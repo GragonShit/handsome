@@ -28,5 +28,8 @@
 *.out
 *.app
 
+# python
+*.pyc
+
 # FileDirectory
-/data
+/data/*

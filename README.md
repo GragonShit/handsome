@@ -1,2 +1,2 @@
 # handsome
-Human's appearance related. U will see.
+Human's appearance related.
