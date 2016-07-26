@@ -4,3 +4,6 @@
 [submodule "3rdparty/xgboost"]
 	path = 3rdparty/xgboost
 	url = https://github.com/dmlc/xgboost.git
+[submodule "3rdparty/tiny-cnn"]
+	path = 3rdparty/tiny-cnn
+	url = https://github.com/nyanp/tiny-cnn.git
