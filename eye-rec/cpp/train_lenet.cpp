@@ -19,7 +19,7 @@ using namespace tiny_cnn::activation;
 #define WIDTH 32
 #define HEIGHT 32
 
-void construct_net(network<sequential>& nn) {
+void construct_lenet(network<sequential>& nn) {
 	// connection table [Y.Lecun, 1998 Table.1]
 #define O true
 #define X false
@@ -41,39 +41,62 @@ void construct_net(network<sequential>& nn) {
             connection_table(tbl, 6, 16))              // C3, 6@14x14-in, 16@10x10-in
        << average_pooling_layer<tan_h>(10, 10, 16, 2)  // S4, 16@10x10-in, 16@5x5-out
        << convolutional_layer<tan_h>(5, 5, 5, 16, 120) // C5, 16@5x5-in, 120@1x1-out
-       << fully_connected_layer<tan_h>(120, 10);       // F6, 120-in, 10-out
+       << fully_connected_layer<tan_h>(120, 2);       // F6, 120-in, 10-out
 }
 
+template <typename N>
+void construct_net(N& nn) {
+    typedef convolutional_layer<activation::identity> conv;
+    typedef max_pooling_layer<relu> pool;
+
+    const int n_fmaps = 32; ///< number of feature maps for upper layer
+    const int n_fmaps2 = 64; ///< number of feature maps for lower layer
+    const int n_fc = 64; ///< number of hidden units in fully-connected layer
+
+    nn << conv(32, 32, 5, 1, n_fmaps, padding::same)
+        << pool(32, 32, n_fmaps, 2)
+        << conv(16, 16, 5, n_fmaps, n_fmaps, padding::same)
+        << pool(16, 16, n_fmaps, 2)
+        << conv(8, 8, 5, n_fmaps, n_fmaps2, padding::same)
+        << pool(8, 8, n_fmaps2, 2)
+        << fully_connected_layer<activation::identity>(4 * 4 * n_fmaps2, n_fc)
+        << fully_connected_layer<softmax>(n_fc, 2);
+}
 // list.txt each line like: "image_name\image_label\n"
 void load_dataset(std::string path, std::vector<vec_t> &images, 
 		std::vector<label_t> &labels) {
-	std::ifstream ifs(path+"/list.txt");
+	std::ifstream ifs(path);
 	std::string line;
+	path = path.substr(0, path.rfind("/"));
 	while(std::getline(ifs, line)) {
-		std::string name = line.substr(line.find("\t"));
+		std::string name = line.substr(0, line.find("\t"));
 
 		label_t label = (label_t)std::stoi(line.substr(line.find("\t")+1));
-		labels.push_back(label);
 
-		vec_t image(HEIGHT*WIDTH, SCALE_MIN);
-
+		vec_t image;
+		
 		auto img = cv::imread(path+"/"+name, cv::IMREAD_GRAYSCALE);
 		if (img.data == nullptr) continue; // cannot open, or it's not an image
 
 		cv::Mat_<uint8_t> resized;
 		cv::resize(img, resized, cv::Size(WIDTH, HEIGHT));
-		std::transform(resized.begin(), resized.end(), std::back_inserter(data),
-				[=](uint8_t c) { return (255 - c) * (SCALE_MAX - SCALE_MIN) / 255.0 + SCALE_MIN; });
+		std::transform(resized.begin(), resized.end(), std::back_inserter(image),
+				[=](uint8_t c) { return (c) * (SCALE_MAX - SCALE_MIN) / 255.0 + SCALE_MIN; });
 		images.push_back(image);
+		labels.push_back(label);
 	}
 }
 
 void train_lenet(std::string train_path, std::string test_path) {
     // specify loss-function and learning strategy
     network<sequential> nn;
-    adagrad optimizer;
+    // adagrad optimizer;
+	momentum optimizer;
+	optimizer.alpha = 0.01;
+	optimizer.lambda = 0.0005;
+	optimizer.mu = 0.9;
 
-    construct_net(nn);
+    construct_lenet(nn);
 
     std::cout << "load models..." << std::endl;
 
@@ -82,25 +105,30 @@ void train_lenet(std::string train_path, std::string test_path) {
     std::vector<vec_t> train_images, test_images;
 
 	load_dataset(train_path, train_images, train_labels);
+	std::cout << "training set num: " << train_images.size() << std::endl;
 	load_dataset(test_path, test_images, test_labels);
+	std::cout << "testing set num: " << test_images.size() << std::endl;
 
     std::cout << "start training" << std::endl;
 
     progress_display disp(train_images.size());
     timer t;
-    int minibatch_size = 10;
-    int num_epochs = 30;
-
-    optimizer.alpha *= static_cast<tiny_cnn::float_t>(std::sqrt(minibatch_size));
+	int index = 0;
+    int minibatch_size = 32;
+    int num_epochs = 15;
 
     // create callback
     auto on_enumerate_epoch = [&](){
         std::cout << t.elapsed() << "s elapsed." << std::endl;
+		std::cout << "epoch " << index << std::endl;
+		t.restart();
         tiny_cnn::result res = nn.test(test_images, test_labels);
+		std::cout << t.elapsed()/res.num_total  << "s per instance: ";
         std::cout << res.num_success << "/" << res.num_total << std::endl;
 
         disp.restart(train_images.size());
         t.restart();
+		index ++;
     };
 
     auto on_enumerate_minibatch = [&](){
@@ -117,7 +145,7 @@ void train_lenet(std::string train_path, std::string test_path) {
     nn.test(test_images, test_labels).print_detail(std::cout);
 
     // save networks
-    std::ofstream ofs("LeNet-weights");
+    std::ofstream ofs("Net-weights");
     ofs << nn;
 }
 
