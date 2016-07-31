@@ -20,7 +20,7 @@ By zhouming402@163.com
 	```
 	git clone --recursive https://github.com/GragonShit/handsome.git
 	cd eye-rec/cpp
-	mkdir build
+	mkdir build && cd build
 	cmake ..
 	make
 	./demo
