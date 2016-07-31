@@ -94,7 +94,7 @@ void recognize(const std::string& dictionary, const std::string& filename) {
 	cout << t.elapsed() << "s elapsed." << std::endl;
     vector<pair<double, int> > scores;
 
-    // sort & print top-3
+    // sort
     for (int i = 0; i < 2; i++)
         scores.emplace_back(rescale<tan_h>(res[i]), i);
 

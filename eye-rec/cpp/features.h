@@ -17,7 +17,7 @@
 
 // eye feature function
 typedef std::vector<float> (*FEATURE_EYE)(cv::Mat&, dlib:: \
-		full_object_detction&, dlib::full_object_detection&)
+		full_object_detection&, dlib::full_object_detection&);
 
 // get eye regions
 void eye_region(const dlib::full_object_detection& shape, 
