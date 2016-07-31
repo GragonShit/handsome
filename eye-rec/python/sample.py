@@ -17,7 +17,7 @@ from util import eye_region
 DEBUG = True
 
 def parse_args():
-	parser = argparse.ArgumentParser(description='')
+	parser = argparse.ArgumentParser(description='make sample')
 
 	parser.add_argument('--data', dest='data_path',
 			help='face datasets path', default=None, type=str)
