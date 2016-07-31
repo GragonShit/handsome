@@ -18,6 +18,7 @@ By zhouming402@163.com
 3. under model directory, there is a face landmarker, a eye landmarker and a eye-status classfier.
 
 	```
+	git clone --recursive https://github.com/GragonShit/handsome.git
 	cd eye-rec/cpp
 	mkdir build
 	cmake ..
