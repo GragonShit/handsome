@@ -29,8 +29,8 @@ def eye_region(shape):
 	xr = rectr[0] + rectr[2]/2.0
 	yr = rectr[1] + rectl[3]/2.0
 
-	w = (xr - xl) * 3 / 6
-	h = (xr - xl) / 5
+	w = (xr - xl) * 3 / 10
+	h = (xr - xl) / 10
 
 	rectl = dlib.rectangle(int(xl-w),int(yl-h),
 			int(xl+w),int(yl+h))

@@ -33,7 +33,7 @@ def parse_args():
 	return args
 
 def save_eyes(img, rectl, rectr, path, jpg, face=None, eyel=None, eyer=None):
-	f = open(osp.join(path, jpg+'.txt'), 'w')
+	# f = open(osp.join(path, jpg+'.txt'), 'w')
 	if face:
 		for i in range(37, 43):
 			cv2.circle(img, (face.part(i).x,face.part(i).y), 4, (0,0,255))
@@ -56,8 +56,7 @@ def save_eyes(img, rectl, rectr, path, jpg, face=None, eyel=None, eyer=None):
 	cv2.imwrite(osp.join(path,jpg+'_eyer.jpg'), 
 			img[rectr.top():rectr.bottom()+1,rectr.left():rectr.right()+1])
 	
-	cv2.imwrite(osp.join(path,jpg+'.jpg'), img)
-	f.close()
+	# f.close()
 
 
 if __name__ == '__main__':
@@ -93,6 +92,7 @@ if __name__ == '__main__':
 						rectl,rectr = eye_region(face)
 						eyel = eye_shaper(img, rectl)
 						eyer = eye_shaper(img, rectr)
-						save_eyes(img, rectl, rectr, spath, osp.splitext(jpg)[0]+'_'+str(k), face, eyel, eyer)
+						# save_eyes(img, rectl, rectr, spath, osp.splitext(jpg)[0]+'_'+str(k), face, eyel, eyer)
+						save_eyes(img, rectl, rectr, spath, osp.splitext(jpg)[0]+'_'+str(k))
 
 
