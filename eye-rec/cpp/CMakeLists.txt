@@ -7,6 +7,13 @@ IF(NOT CMAKE_BUILD_TYPE )
 	SET( CMAKE_BUILD_TYPE "Release" )
 ENDIF()
 
+SET(TINY_CNN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../3rdparty/tiny-cnn")
+include_directories(${TINY_CNN_DIR})
+SET(DLIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../3rdparty/dlib")
+include_directories(${DLIB_DIR})
+
+include(${DLIB_DIR}/dlib/cmake)
+
 OPTION(USE_TBB        "Set to ON to use TBB"             OFF)
 OPTION(USE_OMP        "Set to ON to use OMP"             OFF)
 OPTION(USE_SSE        "Set to ON to use sse"             ON)
@@ -71,17 +78,14 @@ ENDIF()
     SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} ${EXTRA_EXE_LINKER_FLAGS_RELEASE}")
     SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${EXTRA_EXE_LINKER_FLAGS_DEBUG}")
 
-SET(TINY_CNN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../3rdparty/tiny-cnn")
-include_directories(${TINY_CNN_DIR})
-
-#SET( tiny_cnn_hdrs ../../3rdparty/tiny_cnn/tiny_cnn/activations/activation_function.h  ../../3rdparty/tiny_cnn/tiny_cnn/io/cifar10_parser.h  ../../3rdparty/tiny_cnn/tiny_cnn/layers/convolutional_layer.h  ../../3rdparty/tiny_cnn/tiny_cnn/io/display.h  ../../3rdparty/tiny_cnn/tiny_cnn/util/image.h  ../../3rdparty/tiny_cnn/tiny_cnn/layers/layer.h  ../../3rdparty/tiny_cnn/tiny_cnn/lossfunctions/loss_function.h  ../../3rdparty/tiny_cnn/tiny_cnn/io/mnist_parser.h  ../../3rdparty/tiny_cnn/tiny_cnn/optimizers/optimizer.h  ../../3rdparty/tiny_cnn/tiny_cnn/util/product.h  ../../3rdparty/tiny_cnn/tiny_cnn/util/util.h
-#../../3rdparty/tiny_cnn/tiny_cnn/layers/average_pooling_layer.h  ../../3rdparty/tiny_cnn/tiny_cnn/config.h  ../../3rdparty/tiny_cnn/tiny_cnn/util/deform.h ../../3rdparty/tiny_cnn/tiny_cnn/layers/fully_connected_layer.h ../../3rdparty/tiny_cnn/tiny_cnn/layers/input_layer.h  ../../3rdparty/tiny_cnn/tiny_cnn/layers/layers.h  ../../3rdparty/tiny_cnn/tiny_cnn/layers/max_pooling_layer.h  ../../3rdparty/tiny_cnn/tiny_cnn/network.h  ../../3rdparty/tiny_cnn/tiny_cnn/layers/partial_connected_layer.h  ../../3rdparty/tiny_cnn/tiny_cnn/tiny_cnn.h  ../../3rdparty/tiny_cnn/tiny_cnn/util/weight_init.h ../../3rdparty/tiny_cnn/tiny_cnn/layers/arithmetic_layer.h ../../3rdparty/tiny_cnn/tiny_cnn/layers/concat_layer.h ../../3rdparty/tiny_cnn/tiny_cnn/layers/feedforward_layer.h ../../3rdparty/tiny_cnn/tiny_cnn/layers/dropout_layer.h ../../3rdparty/tiny_cnn/tiny_cnn/layers/lrn_layer.h ../../3rdparty/tiny_cnn/tiny_cnn/layers/linear_layer.h ../../3rdparty/tiny_cnn/tiny_cnn/node.h ../../3rdparty/tiny_cnn/tiny_cnn/nodes.h ../../3rdparty/tiny_cnn/tiny_cnn/util/target_cost.h ../../3rdparty/tiny_cnn/tiny_cnn/util/aligned_allocator.h ../../3rdparty/tiny_cnn/tiny_cnn/layers/deconvolutional_layer.h ../../3rdparty/tiny_cnn/tiny_cnn/layers/max_unpooling_layer.h ../../3rdparty/tiny_cnn/tiny_cnn/layers/average_unpooling_layer.h)
-
 ADD_EXECUTABLE(train_lenet train_lenet.cpp)
 TARGET_LINK_LIBRARIES(train_lenet ${OpenCV_LIBS})
 
 ADD_EXECUTABLE(test_lenet test_lenet.cpp)
 TARGET_LINK_LIBRARIES(test_lenet ${OpenCV_LIBS})
+
+ADD_EXECUTABLE(demo demo.cpp)
+TARGET_LINK_LIBRARIES(demo ${OpenCV_LIBS} dlib)
 
 # display env variable
 message(STATUS)
