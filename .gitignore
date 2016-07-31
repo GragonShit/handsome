@@ -33,3 +33,4 @@
 
 # FileDirectory
 /data/*
+build/
