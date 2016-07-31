@@ -89,7 +89,9 @@ void recognize(const std::string& dictionary, const std::string& filename) {
     convert_image(filename, SCALE_MIN, SCALE_MAX, 32, 32, data);
 
     // recognize
+	timer t;
     auto res = nn.predict(data);
+	cout << t.elapsed() << "s elapsed." << std::endl;
     vector<pair<double, int> > scores;
 
     // sort & print top-3
