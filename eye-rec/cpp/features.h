@@ -16,7 +16,7 @@
 
 
 // eye feature function
-typedef std::vector<float> (*FEATURE_EYE)(cv::Mat&, dlib::
+typedef std::vector<float> (*FEATURE_EYE)(cv::Mat&, dlib:: \
 		full_object_detction&, dlib::full_object_detection&)
 
 // get eye regions
@@ -41,8 +41,8 @@ void eye_region(const dlib::full_object_detection& shape,
 	float rightx = rect_righteye.x + rect_righteye.width/2.0;
 	float righty = rect_righteye.y + rect_righteye.height/2.0;
 	// special location?
-	float w = (rightx - leftx) * 3 / 6;
-	float h = (rightx - leftx) / 5;
+	float w = (rightx - leftx) * 3 / 10;
+	float h = (rightx - leftx) / 10;
 	// return 
 	rectl.set_left(leftx - w);
 	rectl.set_top(lefty - h);
