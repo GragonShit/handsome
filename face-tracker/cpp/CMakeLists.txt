@@ -25,3 +25,5 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 ADD_EXECUTABLE(fhog_object_detector_ex fhog_object_detector_ex.cpp)
 TARGET_LINK_LIBRARIES(fhog_object_detector_ex dlib ${OpenCV_LIBS})
 
+ADD_EXECUTABLE(test test.cpp)
+TARGET_LINK_LIBRARIES(test dlib ${OpenCV_LIBS})

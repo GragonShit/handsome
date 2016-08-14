@@ -31,7 +31,9 @@
 
 #include <iostream>
 #include <fstream>
+#include <string>
 
+#include <opencv2/opencv.hpp>
 
 using namespace std;
 using namespace dlib;
@@ -48,12 +50,12 @@ int main(int argc, char** argv)
         // thing we do is load that dataset.  This means you need to supply the
         // path to this faces folder as a command line argument so we will know
         // where it is.
-        if (argc != 3)
+        if (argc != 4)
         {
             cout << "Give the path to the examples/faces directory as the argument to this" << endl;
             cout << "program.  For example, if you are in the examples folder then execute " << endl;
             cout << "this program by running: " << endl;
-            cout << "   ./fhog_object_detector_ex faces" << endl;
+            cout << "   ./fhog_object_detector_ex face_directory side svm_c" << endl;
             cout << endl;
             return 0;
         }
@@ -106,7 +108,7 @@ int main(int argc, char** argv)
         // into images_train.  So this next step doubles the size of our
         // training dataset.  Again, this is obviously optional but is useful in
         // many object detection tasks.
-        add_image_left_right_flips(images_train, face_boxes_train);
+        // add_image_left_right_flips(images_train, face_boxes_train);
         cout << "num training images: " << images_train.size() << endl;
         cout << "num testing images:  " << images_test.size() << endl;
 
@@ -133,7 +135,8 @@ int main(int argc, char** argv)
         // empirically by checking how well the trained detector works on a test set of
         // images you haven't trained on.  Don't just leave the value set at 1.  Try a few
         // different C values and see what works best for your data.
-        trainer.set_c(1);
+        trainer.set_c(std::stoi(argv[3]));
+		trainer.set_epsilon(0.05);
         // We can tell the trainer to print it's progress to the console if we want.  
         trainer.be_verbose();
         // The trainer will run until the "risk gap" is less than 0.01.  Smaller values
@@ -143,10 +146,12 @@ int main(int argc, char** argv)
         // iteration so you can see how close it is to finishing the training.  
         trainer.set_epsilon(0.01);
 
-
         // Now we run the trainer.  For this example, it should take on the order of 10
         // seconds to train.
         object_detector<image_scanner_type> detector = trainer.train(images_train, face_boxes_train);
+		
+		std::ofstream out("dets.dat");
+		dlib::serialize(detector, out);
 
         // Now that we have a face detector we can test it.  The first statement tests it
         // on the training data.  It will print the precision, recall, and then average precision.
@@ -161,21 +166,26 @@ int main(int argc, char** argv)
         // "sticks" visualization of a learned HOG detector.  This next line creates a
         // window with such a visualization of our detector.  It should look somewhat like
         // a face.
-        image_window hogwin(draw_fhog(detector), "Learned fHOG detector");
+        // image_window hogwin(draw_fhog(detector), "Learned fHOG detector");
 
         // Now for the really fun part.  Let's display the testing images on the screen and
         // show the output of the face detector overlaid on each image.  You will see that
         // it finds all the faces without false alarming on any non-faces.
-        image_window win; 
+        // image_window win; 
+		
         for (unsigned long i = 0; i < images_test.size(); ++i)
         {
             // Run the detector and get the face detections.
             std::vector<rectangle> dets = detector(images_test[i]);
-            win.clear_overlay();
-            win.set_image(images_test[i]);
-            win.add_overlay(dets, rgb_pixel(255,0,0));
-            cout << "Hit enter to process the next image..." << endl;
-            cin.get();
+			for(int i = 0; i < dets.size(); ++ i) {
+				dlib::draw_rectangle(images_test[i], dets[i], dlib::rgb_pixel(255,255,255));
+			}
+			dlib::save_jpeg(images_test[i], "jpg/"+to_string(i)+".jpg");
+            //win.clear_overlay();
+            //win.set_image(images_test[i]);
+            //win.add_overlay(dets, rgb_pixel(255,0,0));
+            //cout << "Hit enter to process the next image..." << endl;
+            //cin.get();
         }
     }
     catch (exception& e)
