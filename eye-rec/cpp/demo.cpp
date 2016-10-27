@@ -72,7 +72,8 @@ void convert_image(const cv::Mat& eye,
         [=](uint8_t c) { return (c) * (maxv - minv) / 255.0 + minv; });
 }
 
-bool recognize(network<sequential>& nn, const cv::Mat& gray, 
+// output probability and label
+std::pair<double, int> recognize(network<sequential>& nn, const cv::Mat& gray, 
 		const dlib::rectangle& rect) {
     // convert imagefile to vec_t
     vec_t data;
@@ -94,11 +95,13 @@ bool recognize(network<sequential>& nn, const cv::Mat& gray,
 
 	std::sort(scores.begin(), scores.end(), std::greater<std::pair<double, int>>());
 
+	return scores[0]
+	/*
 	if(scores[0].second == 1) {
 		return true;
 	} else {
 		return false;
-	}
+	}*/
 }
 
 int main(int argc, char** argv) {
@@ -161,9 +164,9 @@ int main(int argc, char** argv) {
 					eye_region(shape, rectl, rectr);
 
 					t.restart();
-					bool flag = recognize(nn, gray, rectl);
+					std::pair<double, int> flag = recognize(nn, gray, rectl);
 					TIMER_INFO(t, "eyel status");
-					if(flag) {
+					if(flag.second == 1) {
 						t.restart();
 						dlib::full_object_detection shapel = sp_eye(img, rectl);
 						TIMER_INFO(t, "eyel landmark");
@@ -176,7 +179,7 @@ int main(int argc, char** argv) {
 					t.restart();
 					flag = recognize(nn, gray, rectr);
 					TIMER_INFO(t, "eyer status");
-					if(flag) {
+					if(flag.second == 1) {
 						t.restart();
 						dlib::full_object_detection shaper = sp_eye(img, rectr);
 						TIMER_INFO(t, "eyel landmark");
