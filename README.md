@@ -29,3 +29,4 @@ By zhouming402@163.com
 4. when the demo is running, 68 face landmarks with green and 12 eye pupil landmarks with red will show.
 when u close ur eyes, corresponding pupil landmarks will disappear.
 
+5. recognize() function output std::pair<double,int>, the first is probability and the second is label. You can make a threshold to control the final result.
