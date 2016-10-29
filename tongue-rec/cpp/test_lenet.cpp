@@ -1,7 +1,7 @@
 /***************************************************************
-* test lenet for eye recognition
+* test lenet for tongue recognition
 * author: zhouming402@163.com
-* date: 2016-07-31
+* date: 2016-10-29
 ***************************************************************/
 
 #include <iostream>
@@ -101,9 +101,9 @@ void recognize(const std::string& dictionary, const std::string& filename) {
     sort(scores.begin(), scores.end(), greater<pair<double, int>>());
 
 	if(scores[0].second == 1) {
-		cout << "eye-open" << endl;
+		cout << "tongue-open" << endl;
 	} else {
-		cout << "eye-close" << endl;
+		cout << "tongue-close" << endl;
 	}
 
     // visualize outputs of each layer

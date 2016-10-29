@@ -1,7 +1,7 @@
 /*******************************************************************
 * demo.cpp
 * author: zhouming402@163.com
-* date: 2016-07-31
+* date: 2016-10-29
 *******************************************************************/
 
 
@@ -72,7 +72,7 @@ void convert_image(const cv::Mat& eye,
         [=](uint8_t c) { return (c) * (maxv - minv) / 255.0 + minv; });
 }
 
-bool recognize(network<sequential>& nn, const cv::Mat& gray, 
+std::pair<double, int> recognize(network<sequential>& nn, const cv::Mat& gray, 
 		const dlib::rectangle& rect) {
     // convert imagefile to vec_t
     vec_t data;
@@ -94,11 +94,7 @@ bool recognize(network<sequential>& nn, const cv::Mat& gray,
 
 	std::sort(scores.begin(), scores.end(), std::greater<std::pair<double, int>>());
 
-	if(scores[0].second == 1) {
-		return true;
-	} else {
-		return false;
-	}
+	return scores[0];
 }
 
 int main(int argc, char** argv) {
@@ -107,8 +103,7 @@ int main(int argc, char** argv) {
         if (argc == 1)
         {
 			std::cout << "LIKE THIS:" << std::endl;
-			std::cout << "./demo /path/to/shape_predictor_face /path/to/shape_predictor_eye";
-			std::cout << " /path/to/NN" << std::endl;
+			std::cout << "./demo /path/to/shape_predictor_face /path/to/NN" << std::endl;
             return 0;
         }
 	
@@ -121,13 +116,10 @@ int main(int argc, char** argv) {
 		// face landmarker
 		dlib::shape_predictor sp_face;
 		dlib::deserialize(argv[1]) >> sp_face;
-		// eye landmarker
-		dlib::shape_predictor sp_eye;
-		dlib::deserialize(argv[2]) >> sp_eye;
-		// eye status classfier
+		// tongue status classfier
 		network<sequential> nn;
 		construct_lenet(nn);
-		std::ifstream ifs(argv[3]);
+		std::ifstream ifs(argv[2]);
 		ifs >> nn;
 		
 		timer t; // timer
@@ -153,38 +145,29 @@ int main(int argc, char** argv) {
 					t.restart();
 					dlib::full_object_detection shape = sp_face(img, dets[j]);
 					TIMER_INFO(t, "face landmark");
-					for(unsigned long k = 0; k < shape.num_parts(); ++ k) {
+					for(unsigned long k = 0; k < 55; ++ k) {
+						draw_solid_circle(img, shape.part(k), 2, dlib::rgb_pixel(0,255,0));
+					}
+					for(unsigned long k = 60; k < 65; ++ k) {
 						draw_solid_circle(img, shape.part(k), 2, dlib::rgb_pixel(0,255,0));
 					}
 
-					dlib::rectangle rectl, rectr;
-					eye_region(shape, rectl, rectr);
+					dlib::rectangle rect;
+					tongue_region(shape, rect);
 
 					t.restart();
-					bool flag = recognize(nn, gray, rectl);
-					TIMER_INFO(t, "eyel status");
-					if(flag) {
-						t.restart();
-						dlib::full_object_detection shapel = sp_eye(img, rectl);
-						TIMER_INFO(t, "eyel landmark");
-						for(int k = 12; k < 19; ++ k) { 
-							dlib::draw_line(img, shapel.part(k), shapel.part(k+1), dlib::rgb_pixel(255,0,0));
+					std::pair<double, int> flag = recognize(nn, gray, rect);
+					TIMER_INFO(t, "tongue status");
+					if(flag.second == 0) {
+						for(unsigned long k = 65; k < 68; ++ k) {
+							draw_solid_circle(img, shape.part(k), 2, dlib::rgb_pixel(0,255,0));
 						}
-						dlib::draw_line(img, shapel.part(19), shapel.part(12), dlib::rgb_pixel(255,0,0));
-					}
-
-					t.restart();
-					flag = recognize(nn, gray, rectr);
-					TIMER_INFO(t, "eyer status");
-					if(flag) {
-						t.restart();
-						dlib::full_object_detection shaper = sp_eye(img, rectr);
-						TIMER_INFO(t, "eyel landmark");
-						for(int k = 12; k < 19; ++ k) { 
-							dlib::draw_line(img, shaper.part(k), shaper.part(k+1), dlib::rgb_pixel(255,0,0));
+						for(unsigned long k = 55; k < 60; ++ k) {
+							draw_solid_circle(img, shape.part(k), 2, dlib::rgb_pixel(0,255,0));
 						}
-						dlib::draw_line(img, shaper.part(19), shaper.part(12), dlib::rgb_pixel(255,0,0));
 					}
+					win.add_overlay(dlib::image_window::overlay_rect(rect, dlib::rgb_pixel(255,0,0), 
+								std::to_string(flag.first)));
 				}
 				win.set_image(img);
 			}

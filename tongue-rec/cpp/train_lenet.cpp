@@ -1,7 +1,7 @@
 /*******************************************************************************
-* train lenet for eye recognition
+* train lenet for tongue recognition
 * author: zhouming402@163.com
-* date: 2016-07-26
+* date: 2016-10-29
 *******************************************************************************/
 
 #include <iostream>

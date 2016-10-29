@@ -1,7 +1,7 @@
 /******************************************************************************
-* extract features for eyes-rec
+* extract features for tongue-rec
 * author: zhouming402@163.com
-* date: 2016-07-24
+* date: 2016-10-29
 ******************************************************************************/
 
 #include <dlib/image_processing/frontal_face_detector.h>
@@ -15,41 +15,25 @@
 #include <string>
 
 
-// eye feature function
-typedef std::vector<float> (*FEATURE_EYE)(cv::Mat&, dlib:: \
+// tongue feature function
+typedef std::vector<float> (*FEATURE_TONGUE)(cv::Mat&, dlib:: \
 		full_object_detection&, dlib::full_object_detection&);
 
-// get eye regions
-void eye_region(const dlib::full_object_detection& shape, 
-		dlib::rectangle& rectl, dlib::rectangle& rectr) {
-	// eyes' points
-	std::vector<cv::Point> lefteye;
-	std::vector<cv::Point> righteye;
+// get tongue regions
+void tongue_region(const dlib::full_object_detection& shape, 
+		dlib::rectangle& rect) {
+	// tongue's points
+	std::vector<cv::Point> tongue;
 
-	for(int k = 36; k <= 41; ++ k) {
-		lefteye.push_back(cv::Point(shape.part(k).x(), shape.part(k).y()));
-	}
-	for(int k = 42; k <=47; ++ k) {
-		righteye.push_back(cv::Point(shape.part(k).x(), shape.part(k).y()));
+	for(int k = 48; k <= 59; ++ k) {
+		tongue.push_back(cv::Point(shape.part(k).x(), shape.part(k).y()));
 	}
 	
-	// eyes' region
-	cv::Rect rect_lefteye = cv::boundingRect(lefteye);
-	cv::Rect rect_righteye = cv::boundingRect(righteye);
-	float leftx = rect_lefteye.x + rect_lefteye.width/2.0;
-	float lefty = rect_lefteye.y + rect_lefteye.height/2.0;
-	float rightx = rect_righteye.x + rect_righteye.width/2.0;
-	float righty = rect_righteye.y + rect_righteye.height/2.0;
-	// special location?
-	float w = (rightx - leftx) * 3 / 10;
-	float h = (rightx - leftx) / 10;
+	// tongue's region
+	cv::Rect rect_tongue = cv::boundingRect(tongue);
 	// return 
-	rectl.set_left(leftx - w);
-	rectl.set_top(lefty - h);
-	rectl.set_right(leftx + w);
-	rectl.set_bottom(lefty + h);
-	rectr.set_left(rightx - w);
-	rectr.set_top(righty - h);
-	rectr.set_right(rightx + w);
-	rectr.set_bottom(righty + h);
+	rect.set_left(rect_tongue.tl().x);
+	rect.set_top(rect_tongue.tl().y);
+	rect.set_right(rect_tongue.br().x);
+	rect.set_bottom(rect_tongue.br().y);
 }

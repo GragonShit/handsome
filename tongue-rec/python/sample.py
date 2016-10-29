@@ -25,10 +25,29 @@ def parse_args():
 			help='face shape predictor path', default=None, type=str)
 	parser.add_argument('--stat', dest='stat_path',
 			help='stat save path', default=None, type=str)
+	parser.add_argument('--aug', dest='augment',
+			help='if augment', default=False, type=bool)
 		
 	args = parser.parse_args()
 
 	return args
+
+def aug_tongue(img, rect, path, jpg):
+	wstep = rect.width()/2
+	hstep = rect.height()/2
+	tongue = img[rect.top()-hstep:rect.bottom()+1+hstep,\
+		  rect.left()-wstep:rect.right()+1+wstep].copy()
+	index = 0
+	# angle
+	for angle in range(-30,40,10):
+		M = cv2.getRotationMatrix2D((tongue.shape[1]/2,tongue.shape[0]/2), angle, 1.0)
+		newtongue = cv2.warpAffine(tongue, M, (tongue.shape[1],tongue.shape[0]))
+		for shift in range(-10,15,5):
+			spath = osp.join(path,jpg+'tongue_{}.jpg'.format(index))
+			cv2.imwrite(spath, 
+					newtongue[int(rect.height()*shift/100.0+hstep):int(rect.height()*shift/100.0+hstep*3),
+					int(rect.width()*shift/100.0+wstep):int(rect.width()*shift/100.0+wstep*3)])
+			index += 1
 
 def save_tongue(img, rect, path, jpg):
 	cv2.imwrite(osp.join(path,jpg+'_tongue.jpg'), 
@@ -65,6 +84,9 @@ if __name__ == '__main__':
 						face = face_shaper(img, d)
 						rect = tongue_region(face)
 						print rect
-						save_tongue(img, rect, spath, osp.splitext(jpg)[0]+'_'+str(k))
+						if args.augment:
+							aug_tongue(img, rect, spath, osp.splitext(jpg)[0]+'_'+str(k))
+						else:
+							save_tongue(img, rect, spath, osp.splitext(jpg)[0]+'_'+str(k))
 
 

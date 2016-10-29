@@ -19,7 +19,9 @@ def parse_args():
 
 	parser.add_argument('--data', dest='data_path',
 			help='eye datasets path', default=None, type=str)
-	parser.add_argument('--stat', dest='stat_path',
+	parser.add_argument('--stat_train', dest='stat_train',
+			help='stat save path', default=None, type=str)
+	parser.add_argument('--stat_test', dest='stat_test',
 			help='stat save path', default=None, type=str)
 		
 	args = parser.parse_args()
@@ -32,13 +34,14 @@ if __name__ == '__main__':
 
 	with open(args.data_path, 'r') as f:
 		data = [line for line in f]
-		random.shuffle(data)
+		data_train = [j for i,j in enumerate(data) if i%10!=0]
+		data_test = [j for i,j in enumerate(data) if i%10==0]
+		random.shuffle(data_train)
+		random.shuffle(data_test)
 
-	if args.stat_path is not None:
-		with open(args.stat_path, 'w') as f:
-			[f.write(line) for line in data]
-	else:
-		with open(args.data_path, 'w') as f:
-			[f.write(line) for line in data]
+	with open(args.stat_train, 'w') as f:
+		[f.write(line) for line in data_train]
+	with open(args.stat_test, 'w') as f:
+		[f.write(line) for line in data_test]
 
 
