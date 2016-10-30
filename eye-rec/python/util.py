@@ -40,6 +40,24 @@ def eye_region(shape):
 	return rectl,rectr
 
 
+def mouth_region(shape):
+	points = np.ndarray((6,1,2), dtype=np.float32)
+	
+	for i in range(36,42):
+		points[i-37,0] = (shape.part(i).x, shape.part(i).y)
+
+	rect = cv2.boundingRect(points)
+
+	'''
+	x = rect[0] + rect[2]/2.0
+	y = rect[1] + rect[3]/2.0
+
+	rectl = dlib.rectangle(int(xl-w),int(yl-h),
+			int(xl+w),int(yl+h))
+	'''
+
+	return rect
+
 if __name__ == '__main__':
 	
 	pass

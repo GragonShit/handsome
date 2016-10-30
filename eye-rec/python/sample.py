@@ -65,7 +65,7 @@ if __name__ == '__main__':
 
 	face_det = dlib.get_frontal_face_detector()
 	face_shaper = dlib.shape_predictor(args.face_shape)
-	eye_shaper = dlib.shape_predictor(args.eye_shape)
+#eye_shaper = dlib.shape_predictor(args.eye_shape)
 
 	if not osp.exists(args.stat_path):
 		os.makedirs(args.stat_path)
