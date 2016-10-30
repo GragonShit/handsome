@@ -12,7 +12,7 @@ import os.path as osp
 import dlib
 import argparse
 import cv2
-from util import tongue_region
+from util import tongue_region, lip_region
 
 DEBUG = True
 
@@ -21,6 +21,8 @@ def parse_args():
 
 	parser.add_argument('--data', dest='data_path',
 			help='face datasets path', default=None, type=str)
+	parser.add_argument('--mode', dest='mode',
+			help='tongue region or lip region', default="lip", type=str)
 	parser.add_argument('--face', dest='face_shape',
 			help='face shape predictor path', default=None, type=str)
 	parser.add_argument('--stat', dest='stat_path',
@@ -32,7 +34,7 @@ def parse_args():
 
 	return args
 
-def aug_tongue(img, rect, path, jpg):
+def aug(img, rect, path, jpg):
 	wstep = rect.width()/2
 	hstep = rect.height()/2
 	tongue = img[rect.top()-hstep:rect.bottom()+1+hstep,\
@@ -43,14 +45,14 @@ def aug_tongue(img, rect, path, jpg):
 		M = cv2.getRotationMatrix2D((tongue.shape[1]/2,tongue.shape[0]/2), angle, 1.0)
 		newtongue = cv2.warpAffine(tongue, M, (tongue.shape[1],tongue.shape[0]))
 		for shift in range(-10,15,5):
-			spath = osp.join(path,jpg+'tongue_{}.jpg'.format(index))
+			spath = osp.join(path,jpg+'_{}.jpg'.format(index))
 			cv2.imwrite(spath, 
 					newtongue[int(rect.height()*shift/100.0+hstep):int(rect.height()*shift/100.0+hstep*3),
 					int(rect.width()*shift/100.0+wstep):int(rect.width()*shift/100.0+wstep*3)])
 			index += 1
 
-def save_tongue(img, rect, path, jpg):
-	cv2.imwrite(osp.join(path,jpg+'_tongue.jpg'), 
+def save(img, rect, path, jpg):
+	cv2.imwrite(osp.join(path,jpg+'.jpg'), 
 			img[rect.top():rect.bottom()+1,rect.left():rect.right()+1])
 
 if __name__ == '__main__':
@@ -82,11 +84,15 @@ if __name__ == '__main__':
 							print("Detection {}: Left: {} Top: {} Right: {} Bottom: {}".format(
 										k, d.left(), d.top(), d.right(), d.bottom()))
 						face = face_shaper(img, d)
-						rect = tongue_region(face)
+						if args.mode == 'tongue':
+							rect = tongue_region(face)
+						elif args.mode == 'lip':
+							rect = lip_region(face)
 						print rect
 						if args.augment:
-							aug_tongue(img, rect, spath, osp.splitext(jpg)[0]+'_'+str(k))
+							aug(img, rect, spath, osp.splitext(jpg)[0]+'_'+str(k))
 						else:
-							save_tongue(img, rect, spath, osp.splitext(jpg)[0]+'_'+str(k))
+							save(img, rect, spath, osp.splitext(jpg)[0]+'_'+str(k))
+						break; # one image one face
 
 
