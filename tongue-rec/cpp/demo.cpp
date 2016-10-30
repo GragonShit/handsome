@@ -153,7 +153,8 @@ int main(int argc, char** argv) {
 					}
 
 					dlib::rectangle rect;
-					tongue_region(shape, rect);
+					// tongue_region(shape, rect);
+					lip_region(shape, rect);
 
 					t.restart();
 					std::pair<double, int> flag = recognize(nn, gray, rect);
@@ -166,8 +167,8 @@ int main(int argc, char** argv) {
 							draw_solid_circle(img, shape.part(k), 2, dlib::rgb_pixel(0,255,0));
 						}
 					}
-					win.add_overlay(dlib::image_window::overlay_rect(rect, dlib::rgb_pixel(255,0,0), 
-								std::to_string(flag.first)));
+					// win.add_overlay(dlib::image_window::overlay_rect(rect, dlib::rgb_pixel(255,0,0), 
+					//			std::to_string(flag.first)));
 				}
 				win.set_image(img);
 			}
