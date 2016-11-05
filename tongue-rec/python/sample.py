@@ -12,7 +12,7 @@ import os.path as osp
 import dlib
 import argparse
 import cv2
-from util import tongue_region, lip_region
+from util import tongue_region, lip_region, lip_jaw_region
 
 DEBUG = True
 
@@ -22,7 +22,7 @@ def parse_args():
 	parser.add_argument('--data', dest='data_path',
 			help='face datasets path', default=None, type=str)
 	parser.add_argument('--mode', dest='mode',
-			help='tongue region or lip region', default="lip", type=str)
+			help='tongue region or lip region or lip_jaw region', default="lip", type=str)
 	parser.add_argument('--face', dest='face_shape',
 			help='face shape predictor path', default=None, type=str)
 	parser.add_argument('--stat', dest='stat_path',
@@ -88,7 +88,8 @@ if __name__ == '__main__':
 							rect = tongue_region(face)
 						elif args.mode == 'lip':
 							rect = lip_region(face)
-						print rect
+						elif args.mode == 'lip_jaw':
+							rect = lip_jaw_region(face)
 						if args.augment:
 							aug(img, rect, spath, osp.splitext(jpg)[0]+'_'+str(k))
 						else:

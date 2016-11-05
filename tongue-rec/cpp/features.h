@@ -38,6 +38,28 @@ void tongue_region(const dlib::full_object_detection& shape,
 	rect.set_bottom(rect_tongue.br().y);
 }
 
+// get lip_jaw regions
+void lip_jaw_region(const dlib::full_object_detection& shape, 
+		dlib::rectangle& rect) {
+	// tongue's points
+	std::vector<cv::Point> tongue;
+
+	for(int k = 48; k <= 54; ++ k) {
+		tongue.push_back(cv::Point(shape.part(k).x(), shape.part(k).y()));
+	}
+	for(int k = 7; k <= 9; ++ k) {
+		tongue.push_back(cv::Point(shape.part(k).x(), shape.part(k).y()));
+	}
+	
+	// tongue's region
+	cv::Rect rect_tongue = cv::boundingRect(tongue);
+	// return 
+	rect.set_left(rect_tongue.tl().x);
+	rect.set_top(rect_tongue.tl().y);
+	rect.set_right(rect_tongue.br().x);
+	rect.set_bottom(rect_tongue.br().y);
+}
+
 // get lip region
 void lip_region(const dlib::full_object_detection& shape, 
 		dlib::rectangle& rect) {

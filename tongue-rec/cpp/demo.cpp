@@ -54,7 +54,7 @@ void construct_lenet(network<sequential>& nn) {
             connection_table(tbl, 6, 16))              // C3, 6@14x14-in, 16@10x10-in
        << average_pooling_layer<tan_h>(10, 10, 16, 2)  // S4, 16@10x10-in, 16@5x5-out
        << convolutional_layer<tan_h>(5, 5, 5, 16, 120) // C5, 16@5x5-in, 120@1x1-out
-       << fully_connected_layer<tan_h>(120, 2);       // F6, 120-in, 10-out
+       << fully_connected_layer<tan_h>(120, 3);       // F6, 120-in, 10-out
 }
 
 void convert_image(const cv::Mat& eye,
@@ -154,12 +154,12 @@ int main(int argc, char** argv) {
 
 					dlib::rectangle rect;
 					// tongue_region(shape, rect);
-					lip_region(shape, rect);
+					lip_jaw_region(shape, rect);
 
 					t.restart();
 					std::pair<double, int> flag = recognize(nn, gray, rect);
 					TIMER_INFO(t, "tongue status");
-					if(flag.second == 0) {
+					if(flag.second != 1) {
 						for(unsigned long k = 65; k < 68; ++ k) {
 							draw_solid_circle(img, shape.part(k), 2, dlib::rgb_pixel(0,255,0));
 						}
