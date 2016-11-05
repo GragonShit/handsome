@@ -159,6 +159,7 @@ int main(int argc, char** argv) {
 					t.restart();
 					std::pair<double, int> flag = recognize(nn, gray, rect);
 					TIMER_INFO(t, "tongue status");
+					std::cout << flag.second << ": " << flag.first << std::endl;
 					if(flag.second != 1) {
 						for(unsigned long k = 65; k < 68; ++ k) {
 							draw_solid_circle(img, shape.part(k), 2, dlib::rgb_pixel(0,255,0));
