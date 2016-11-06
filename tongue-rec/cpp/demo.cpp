@@ -65,8 +65,12 @@ void convert_image(const cv::Mat& eye,
     vec_t& data) {
     if (eye.data == nullptr) return; // cannot open, or it's not an image
 
+	// equalization
+	cv::Mat equalized;
+	cv::equalizeHist(eye, equalized);
+
     cv::Mat_<uint8_t> resized;
-    cv::resize(eye, resized, cv::Size(w, h));
+    cv::resize(equalized, resized, cv::Size(w, h));
 
     std::transform(resized.begin(), resized.end(), std::back_inserter(data),
         [=](uint8_t c) { return (c) * (maxv - minv) / 255.0 + minv; });
@@ -77,7 +81,7 @@ std::pair<double, int> recognize(network<sequential>& nn, const cv::Mat& gray,
     // convert imagefile to vec_t
     vec_t data;
     convert_image(gray(cv::Range(rect.top(),rect.bottom()+1), 
-				cv::Range(rect.left(),rect.right())), 
+				cv::Range(rect.left(),rect.right()+1)), 
 			SCALE_MIN, 
 			SCALE_MAX, 
 			32, 
