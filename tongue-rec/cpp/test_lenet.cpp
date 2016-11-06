@@ -41,7 +41,7 @@ void construct_lenet(network<sequential>& nn) {
             connection_table(tbl, 6, 16))              // C3, 6@14x14-in, 16@10x10-in
        << average_pooling_layer<tan_h>(10, 10, 16, 2)  // S4, 16@10x10-in, 16@5x5-out
        << convolutional_layer<tan_h>(5, 5, 5, 16, 120) // C5, 16@5x5-in, 120@1x1-out
-       << fully_connected_layer<tan_h>(120, 2);       // F6, 120-in, 10-out
+       << fully_connected_layer<softmax>(120, 3);       // F6, 120-in, 10-out
 }
 
 // rescale output to 0-100
@@ -77,7 +77,7 @@ void convert_image(const std::string& imagefilename,
 
 void recognize(const std::string& dictionary, const std::string& filename) {
     network<sequential> nn;
-
+	
     construct_lenet(nn);
 
     // load nets
@@ -95,15 +95,16 @@ void recognize(const std::string& dictionary, const std::string& filename) {
     vector<pair<double, int> > scores;
 
     // sort
-    for (int i = 0; i < 2; i++)
-        scores.emplace_back(rescale<tan_h>(res[i]), i);
+    for (int i = 0; i < 3; i++)
+        // scores.emplace_back(rescale<tan_h>(res[i]), i);
+        scores.emplace_back(res[i], i);
 
     sort(scores.begin(), scores.end(), greater<pair<double, int>>());
 
-	if(scores[0].second == 1) {
-		cout << "tongue-open" << endl;
+	if(scores[0].second != 1) {
+		cout << "tongue" << endl;
 	} else {
-		cout << "tongue-close" << endl;
+		cout << "lip" << endl;
 	}
 
     // visualize outputs of each layer
