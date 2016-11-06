@@ -119,9 +119,13 @@ void load_dataset(std::string path, std::vector<vec_t> &images,
 		
 		auto img = cv::imread(path+"/"+name, cv::IMREAD_GRAYSCALE);
 		if (img.data == nullptr) continue; // cannot open, or it's not an image
+		
+		// equalization
+		cv::Mat equalized;
+		cv::equalizeHist(img, equalized);
 
 		cv::Mat_<uint8_t> resized;
-		cv::resize(img, resized, cv::Size(WIDTH, HEIGHT));
+		cv::resize(equalized, resized, cv::Size(WIDTH, HEIGHT));
 		std::transform(resized.begin(), resized.end(), std::back_inserter(image),
 				[=](uint8_t c) { return (c) * (SCALE_MAX - SCALE_MIN) / 255.0 + SCALE_MIN; });
 		images.push_back(image);
