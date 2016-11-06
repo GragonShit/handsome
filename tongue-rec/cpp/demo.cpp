@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <ctime>
 #include "tiny_cnn/tiny_cnn.h"
 
 #include <opencv2/opencv.hpp>
@@ -54,7 +55,7 @@ void construct_lenet(network<sequential>& nn) {
             connection_table(tbl, 6, 16))              // C3, 6@14x14-in, 16@10x10-in
        << average_pooling_layer<tan_h>(10, 10, 16, 2)  // S4, 16@10x10-in, 16@5x5-out
        << convolutional_layer<tan_h>(5, 5, 5, 16, 120) // C5, 16@5x5-in, 120@1x1-out
-       << fully_connected_layer<tan_h>(120, 3);       // F6, 120-in, 10-out
+       << fully_connected_layer<softmax>(120, 3);       // F6, 120-in, 10-out
 }
 
 void convert_image(const cv::Mat& eye,
@@ -77,7 +78,7 @@ std::pair<double, int> recognize(network<sequential>& nn, const cv::Mat& gray,
     // convert imagefile to vec_t
     vec_t data;
     convert_image(gray(cv::Range(rect.top(),rect.bottom()+1), 
-				cv::Range(rect.left(),rect.right())), 
+				cv::Range(rect.left(),rect.right()+1)), 
 			SCALE_MIN, 
 			SCALE_MAX, 
 			32, 
@@ -89,12 +90,18 @@ std::pair<double, int> recognize(network<sequential>& nn, const cv::Mat& gray,
 	std::vector<std::pair<double, int> > scores;
 
     // sort 
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < 3; i++)
         scores.emplace_back(res[i], i);
 
 	std::sort(scores.begin(), scores.end(), std::greater<std::pair<double, int>>());
 
 	return scores[0];
+}
+
+void save(const cv::Mat& resized, const dlib::rectangle& rect, 
+		std::string name) {
+	cv::imwrite(name, resized(cv::Range(rect.top(),rect.bottom()+1), 
+				cv::Range(rect.left(),rect.right()+1)));
 }
 
 int main(int argc, char** argv) {
@@ -145,12 +152,6 @@ int main(int argc, char** argv) {
 					t.restart();
 					dlib::full_object_detection shape = sp_face(img, dets[j]);
 					TIMER_INFO(t, "face landmark");
-					for(unsigned long k = 0; k < 55; ++ k) {
-						draw_solid_circle(img, shape.part(k), 2, dlib::rgb_pixel(0,255,0));
-					}
-					for(unsigned long k = 60; k < 65; ++ k) {
-						draw_solid_circle(img, shape.part(k), 2, dlib::rgb_pixel(0,255,0));
-					}
 
 					dlib::rectangle rect;
 					// tongue_region(shape, rect);
@@ -160,6 +161,15 @@ int main(int argc, char** argv) {
 					std::pair<double, int> flag = recognize(nn, gray, rect);
 					TIMER_INFO(t, "tongue status");
 					std::cout << flag.second << ": " << flag.first << std::endl;
+					// draw
+					save(resized, rect, std::to_string(std::clock())+".jpg");
+					dlib::draw_rectangle(img, rect, dlib::rgb_pixel(0,0,255));
+					for(unsigned long k = 0; k < 55; ++ k) {
+						draw_solid_circle(img, shape.part(k), 2, dlib::rgb_pixel(0,255,0));
+					}
+					for(unsigned long k = 60; k < 65; ++ k) {
+						draw_solid_circle(img, shape.part(k), 2, dlib::rgb_pixel(0,255,0));
+					}
 					if(flag.second != 1) {
 						for(unsigned long k = 65; k < 68; ++ k) {
 							draw_solid_circle(img, shape.part(k), 2, dlib::rgb_pixel(0,255,0));
