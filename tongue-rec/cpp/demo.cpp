@@ -58,17 +58,17 @@ void construct_lenet(network<sequential>& nn) {
        << fully_connected_layer<softmax>(120, 3);       // F6, 120-in, 10-out
 }
 
-void convert_image(const cv::Mat& eye,
+void convert_image(const cv::Mat& img,
     double minv,
     double maxv,
     int w,
     int h,
     vec_t& data) {
-    if (eye.data == nullptr) return; // cannot open, or it's not an image
+    if (img.data == nullptr) return; // cannot open, or it's not an image
 
 	// equalization
 	cv::Mat equalized;
-	cv::equalizeHist(eye, equalized);
+	cv::equalizeHist(img, equalized);
 
     cv::Mat_<uint8_t> resized;
     cv::resize(equalized, resized, cv::Size(w, h));
@@ -158,15 +158,14 @@ int main(int argc, char** argv) {
 					TIMER_INFO(t, "face landmark");
 
 					dlib::rectangle rect;
-					// tongue_region(shape, rect);
 					lip_jaw_region(shape, rect);
 
 					t.restart();
 					std::pair<double, int> flag = recognize(nn, gray, rect);
 					TIMER_INFO(t, "tongue status");
-					std::cout << flag.second << ": " << flag.first << std::endl;
+					// std::cout << flag.second << ": " << flag.first << std::endl;
 					// draw
-					save(resized, rect, std::to_string(std::clock())+".jpg");
+					// save(resized, rect, std::to_string(std::clock())+".jpg");
 					dlib::draw_rectangle(img, rect, dlib::rgb_pixel(0,0,255));
 					for(unsigned long k = 0; k < 55; ++ k) {
 						draw_solid_circle(img, shape.part(k), 2, dlib::rgb_pixel(0,255,0));
@@ -182,8 +181,6 @@ int main(int argc, char** argv) {
 							draw_solid_circle(img, shape.part(k), 2, dlib::rgb_pixel(0,255,0));
 						}
 					}
-					// win.add_overlay(dlib::image_window::overlay_rect(rect, dlib::rgb_pixel(255,0,0), 
-					//			std::to_string(flag.first)));
 				}
 				win.set_image(img);
 			}
